@@ -1,3 +1,3 @@
-pyotp
-pyqrcode
-requests
+pyotp==2.3.0
+pyqrcode==1.2.1
+requests==2.22.0
