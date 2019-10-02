@@ -7,53 +7,47 @@ import json
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: python duo_bypass.py <url to duo qr>")
+    print("Usage: python duo_activate.py <url to duo qr>")
     sys.exit()
 
 qr_url = sys.argv[1]
 
 host = 'api-%s' % (qr_url.split('/')[2].split('-')[1],)
-code = qr_url.rsplit('/',1)[1]
+code = qr_url.rsplit('/qr?value=',1)[1].split('-')[0]
 
 url = 'https://{host}/push/v2/activation/{code}?customer_protocol=1'.format(host=host, code=code)
+print("url", url)
 headers = {'User-Agent': 'okhttp/2.7.5'}
 data = {'jailbroken': 'false',
         'architecture': 'armv7',
-        'region': 'US',
+        'region': 'NL',
         'app_id': 'com.duosecurity.duomobile',
         'full_disk_encryption': 'true',
         'passcode_status': 'true',
         'platform': 'Android',
-        'app_version': '3.23.0',
-        'app_build_number': '323001',
-        'version': '8.1',
+        'app_version': '3.29.1',
+        'app_build_number': '329101',
+        'version': '10.0',
         'manufacturer': 'unknown',
         'language': 'en',
-        'model': 'Pixel C',
-        'security_patch_level': '2018-12-01'}
+        'model': 'Command line',
+        'security_patch_level': '2019-10-01'}
 
 r = requests.post(url, headers=headers, data=data)
 response = json.loads(r.text)
 
 try:
-  secret = base64.b32encode(response['response']['hotp_secret'])
+  secret = base64.b32encode(response['response']['hotp_secret'].encode("UTF-8"))
 except KeyError:
   print(response)
   sys.exit(1)
 
 print("secret", secret)
 
-print("10 Next OneTime Passwords!")
-# Generate 10 Otps!
-hotp = pyotp.HOTP(secret)
-for _ in xrange(10):
-    print(hotp.at(_))
-
 f = open('duotoken.hotp', 'w')
-f.write(secret + "\n")
-f.write("0")
+f.write(secret.decode("UTF-8"))
+f.write("\n0")
 f.close()
 
 with open('response.json', 'w') as resp:
     resp.write(r.text)
-
