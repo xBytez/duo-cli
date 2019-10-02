@@ -13,11 +13,15 @@ secret = f.readline()[0:-1]
 offset = f.tell()
 count = int(f.readline())
 
-print("secret", secret)
-print("count", count)
+debug = False
 
 hotp = pyotp.HOTP(secret)
-print("Code:", hotp.at(count))
+if debug:
+    print("secret", secret)
+    print("count", count)
+    print("code:", hotp.at(count))
+else:
+    print(hotp.at(count))
 
 f.seek(offset)
 f.write(str(count + 1))
